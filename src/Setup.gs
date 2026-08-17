@@ -119,7 +119,19 @@ function refreshApplicationsForTeacher_() {
   });
 
   const headers = APP_CONFIG.SHEET_HEADERS.APPLICATIONS;
-  const applications = getRowsAsObjects_(APP_CONFIG.APPLICATIONS_SHEET, headers);
+  let applications = getRowsAsObjects_(APP_CONFIG.APPLICATIONS_SHEET, headers);
+  // 구버전에서 soft delete된 행은 DELETE 이력이 이미 보존되어 있으므로 활성 시트에서 제거한다.
+  const deletedRows = applications.filter(function(application) {
+    return Boolean(application.deleted_at);
+  }).map(function(application) {
+    return application._rowNumber;
+  }).sort(function(a, b) {
+    return b - a;
+  });
+  deletedRows.forEach(function(rowNumber) { sheet.deleteRow(rowNumber); });
+  if (deletedRows.length) {
+    applications = getRowsAsObjects_(APP_CONFIG.APPLICATIONS_SHEET, headers);
+  }
   applications.forEach(function(application) {
     const student = studentsById[String(application.student_id)];
     application.student_name = student ? student.name : '(학생 정보 없음)';

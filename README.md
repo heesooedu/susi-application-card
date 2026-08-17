@@ -67,7 +67,7 @@ src/
 - 클라이언트에는 해당 학생의 공개 프로필과 카드만 반환하며 `student_id`, token, 다른 학생 데이터는 반환하지 않습니다.
 - 모든 쓰기는 `LockService.getScriptLock()` 안에서 처리합니다.
 - 사용자 문자열이 공백 뒤 `=`, `+`, `-`, `@`로 시작하면 Sheets에 텍스트로 기록해 formula injection을 방지합니다.
-- 삭제는 `deleted_at`을 기록하는 soft delete이며 변경 전후 snapshot을 이력 시트에 남깁니다.
+- 삭제는 먼저 `deleted_at`이 포함된 snapshot을 이력 시트에 남긴 다음 활성 `APPLICATIONS` 행을 제거합니다.
 
 기존 초기 스키마의 `APPLICATIONS` 시트는 새 코드가 처음 실행될 때 학생 표시 열을 자동 삽입하고, `student_id`를 기준으로 기존 카드의 이름·반·번호를 역채움합니다.
 

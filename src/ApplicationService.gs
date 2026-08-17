@@ -66,7 +66,8 @@ function updateApplication(token, applicationId, payload) {
   });
 }
 
-// soft delete만 수행하며, 전달받은 student_id는 받지도 신뢰하지도 않는다.
+// 삭제 snapshot을 이력에 먼저 보존한 뒤 활성 APPLICATIONS 행을 제거한다.
+// 전달받은 student_id는 받지도 신뢰하지도 않는다.
 function deleteApplication(token, applicationId) {
   ensureApplicationSchema_();
   return withDocumentLock_(function() {
@@ -77,10 +78,8 @@ function deleteApplication(token, applicationId) {
       deleted_at: new Date()
     });
 
-    getSheetOrThrow_(APP_CONFIG.APPLICATIONS_SHEET)
-      .getRange(found.application._rowNumber, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
-      .setValues([makeRow_(APP_CONFIG.SHEET_HEADERS.APPLICATIONS, deleted)]);
     appendApplicationHistory_('DELETE', deleted);
+    getSheetOrThrow_(APP_CONFIG.APPLICATIONS_SHEET).deleteRow(found.application._rowNumber);
     refreshApplicationsForTeacher_();
     return { success: true };
   });

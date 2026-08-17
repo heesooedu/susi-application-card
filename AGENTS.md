@@ -14,8 +14,8 @@ Google Sheets is the only datastore.
   token on every student read or write, then verify application ownership server-side.
 - Escape all user-controlled strings before writing them to Sheets to prevent formula
   injection. Render user content with DOM text APIs, not `innerHTML`.
-- Use a script lock around all multi-step writes. Keep application deletion as a
-  soft delete and preserve application history.
+- Use a script lock around all multi-step writes. Preserve a complete DELETE snapshot
+  in application history before removing the active APPLICATIONS row.
 - Never commit `.clasp.json`, clasp login data, environment files, or Google
   credential JSON files.
 
