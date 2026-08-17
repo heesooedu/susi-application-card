@@ -1,0 +1,5 @@
+# rootDir=src 안에서 Apps Script가 사용하는 파일만 업로드한다.
+**/*
+!**/*.gs
+!**/*.html
+!appsscript.json

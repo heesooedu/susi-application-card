@@ -1,0 +1,18 @@
+# clasp 프로젝트 연결 정보 및 로그인 자격 증명
+.clasp.json
+.clasprc.json
+**/.clasprc.json
+
+# 환경 변수 / Google API 자격 증명
+.env
+.env.*
+client_secret*.json
+credentials*.json
+service-account*.json
+token*.json
+
+# 로컬 도구 산출물
+node_modules/
+.DS_Store
+Thumbs.db
+*.log

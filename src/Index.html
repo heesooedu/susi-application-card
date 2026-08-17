@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <base target="_top">
+    <?!= include_('Styles'); ?>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-inner">
+        <p class="eyebrow">MY APPLICATION PLAN</p>
+        <h1>수시 지원 카드</h1>
+        <p id="student-summary" class="student-summary">학생 정보를 불러오는 중입니다.</p>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <div id="notice" class="notice" role="status" aria-live="polite"></div>
+
+      <section id="dashboard" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">APPLICATIONS</p>
+            <h2>나의 지원 계획</h2>
+          </div>
+          <button id="open-form-button" class="button button-primary" type="button">+ 지원 카드 추가</button>
+        </div>
+        <div id="application-list" class="card-grid"></div>
+        <div id="empty-state" class="empty-state" hidden>
+          <div class="empty-icon" aria-hidden="true">✦</div>
+          <h3>아직 작성한 지원 카드가 없어요.</h3>
+          <p>관심 있는 대학과 전형부터 하나씩 정리해 보세요.</p>
+        </div>
+      </section>
+
+      <section id="application-form-section" class="form-panel" hidden>
+        <div class="section-heading compact">
+          <div>
+            <p class="section-kicker">NEW CARD</p>
+            <h2>지원 카드 추가</h2>
+          </div>
+          <button id="close-form-button" class="button button-ghost" type="button">닫기</button>
+        </div>
+
+        <form id="application-form">
+          <div class="form-grid">
+            <label>대학 <span class="required">필수</span>
+              <input name="university" maxlength="150" required autocomplete="organization">
+            </label>
+            <label>학과/학부 <span class="required">필수</span>
+              <input name="department" maxlength="150" required>
+            </label>
+            <label>전형 유형 <span class="required">필수</span>
+              <input name="admission_type" maxlength="100" required placeholder="예: 학생부종합">
+            </label>
+            <label>전형명 <span class="required">필수</span>
+              <input name="admission_name" maxlength="150" required placeholder="예: 학교장추천전형">
+            </label>
+            <label>모집인원
+              <input name="quota" maxlength="30" inputmode="numeric" placeholder="예: 12명">
+            </label>
+            <label>지원 수준 <span class="required">필수</span>
+              <select name="support_level" required>
+                <option value="">선택하세요</option>
+                <option>매우 상향</option>
+                <option>상향</option>
+                <option>적정</option>
+                <option>안정</option>
+              </select>
+            </label>
+            <fieldset class="field-span-2">
+              <legend>수능최저 <span class="required">필수</span></legend>
+              <div class="radio-row">
+                <label class="radio-label"><input type="radio" name="csat_minimum" value="있음" required> 있음</label>
+                <label class="radio-label"><input type="radio" name="csat_minimum" value="없음" required> 없음</label>
+              </div>
+            </fieldset>
+            <label id="csat-details-label" class="field-span-2">수능최저 세부내용
+              <textarea name="csat_minimum_details" maxlength="1000" rows="2" placeholder="예: 국·수·영·탐(1) 중 3개 합 7 이내"></textarea>
+            </label>
+            <label class="field-span-2">평가요소
+              <textarea name="evaluation_elements" maxlength="2000" rows="3" placeholder="서류, 교과, 비교과 등의 반영 방식"></textarea>
+            </label>
+            <label class="field-span-2">면접 여부 및 방식
+              <textarea name="interview_details" maxlength="1000" rows="2" placeholder="면접 없음 / 제시문 기반 / 서류 확인 등"></textarea>
+            </label>
+            <label>공식자료 URL
+              <input name="official_url" type="url" maxlength="1000" inputmode="url" placeholder="https://...">
+            </label>
+            <label>자료 기준
+              <input name="source_reference" maxlength="500" placeholder="예: 2027학년도 수시모집요강 p.32">
+            </label>
+            <label class="field-span-2">지원 이유
+              <textarea name="support_reason" maxlength="3000" rows="4"></textarea>
+            </label>
+            <label class="field-span-2">본인이 생각하는 강점
+              <textarea name="strengths" maxlength="3000" rows="4"></textarea>
+            </label>
+            <label class="field-span-2">우려되는 점
+              <textarea name="concerns" maxlength="3000" rows="4"></textarea>
+            </label>
+            <label class="field-span-2">선생님께 질문하고 싶은 내용
+              <textarea name="questions" maxlength="3000" rows="4"></textarea>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button id="cancel-form-button" class="button button-ghost" type="button">취소</button>
+            <button id="save-button" class="button button-primary" type="submit">카드 저장</button>
+          </div>
+        </form>
+      </section>
+    </main>
+    <?!= include_('ClientJS'); ?>
+  </body>
+</html>

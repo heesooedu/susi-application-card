@@ -1,0 +1,155 @@
+<script>
+  (function() {
+    'use strict';
+
+    const token = new URLSearchParams(window.location.search).get('t') || '';
+    const notice = document.getElementById('notice');
+    const dashboard = document.getElementById('dashboard');
+    const list = document.getElementById('application-list');
+    const emptyState = document.getElementById('empty-state');
+    const formSection = document.getElementById('application-form-section');
+    const form = document.getElementById('application-form');
+    const saveButton = document.getElementById('save-button');
+
+    document.getElementById('open-form-button').addEventListener('click', openForm);
+    document.getElementById('close-form-button').addEventListener('click', closeForm);
+    document.getElementById('cancel-form-button').addEventListener('click', closeForm);
+    form.addEventListener('submit', saveApplication);
+    form.addEventListener('change', function(event) {
+      if (event.target.name === 'csat_minimum') updateMinimumDetails();
+    });
+
+    if (!/^[a-f0-9]{64}$/i.test(token)) {
+      showNotice('학생 주소가 올바르지 않습니다. 선생님께 받은 주소 전체를 다시 확인해 주세요.', true);
+      document.getElementById('student-summary').textContent = '접근할 수 없습니다.';
+      return;
+    }
+    loadDashboard();
+
+    function loadDashboard() {
+      showNotice('지원 카드를 불러오는 중입니다.', false);
+      google.script.run
+        .withSuccessHandler(function(data) {
+          hideNotice();
+          document.getElementById('student-summary').textContent =
+            data.student.className + ' · ' + data.student.number + '번 · ' + data.student.name;
+          dashboard.hidden = false;
+          renderApplications(data.applications || []);
+        })
+        .withFailureHandler(handleFailure)
+        .getStudentDashboard(token);
+    }
+
+    function saveApplication(event) {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const payload = {};
+      new FormData(form).forEach(function(value, key) { payload[key] = value; });
+      saveButton.disabled = true;
+      saveButton.textContent = '저장 중…';
+
+      google.script.run
+        .withSuccessHandler(function() {
+          form.reset();
+          updateMinimumDetails();
+          closeForm();
+          saveButton.disabled = false;
+          saveButton.textContent = '카드 저장';
+          showNotice('지원 카드가 저장되었습니다.', false);
+          loadDashboard();
+        })
+        .withFailureHandler(function(error) {
+          saveButton.disabled = false;
+          saveButton.textContent = '카드 저장';
+          handleFailure(error);
+        })
+        .createApplication(token, payload);
+    }
+
+    function renderApplications(applications) {
+      list.replaceChildren();
+      emptyState.hidden = applications.length !== 0;
+      applications.forEach(function(application) {
+        const card = document.createElement('article');
+        card.className = 'application-card';
+
+        const top = document.createElement('div');
+        top.className = 'card-top';
+        const titleWrap = document.createElement('div');
+        const university = document.createElement('div');
+        university.className = 'university';
+        university.textContent = application.university;
+        const department = document.createElement('div');
+        department.className = 'department';
+        department.textContent = application.department;
+        const level = document.createElement('span');
+        level.className = 'level-pill';
+        level.textContent = application.support_level;
+        titleWrap.append(university, department);
+        top.append(titleWrap, level);
+        card.appendChild(top);
+
+        const admission = document.createElement('p');
+        admission.className = 'admission-line';
+        admission.textContent = application.admission_type + ' · ' + application.admission_name;
+        card.appendChild(admission);
+        addDetail(card, '모집인원', application.quota);
+        addDetail(card, '수능최저', application.csat_minimum + (application.csat_minimum_details ? ' · ' + application.csat_minimum_details : ''));
+        addDetail(card, '지원 이유', application.support_reason);
+
+        if (application.official_url) {
+          const link = document.createElement('a');
+          link.className = 'source-link';
+          link.href = application.official_url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = '공식자료 보기 ↗';
+          card.appendChild(link);
+        }
+        list.appendChild(card);
+      });
+    }
+
+    function addDetail(card, label, value) {
+      if (!value) return;
+      const detail = document.createElement('p');
+      detail.className = 'card-detail';
+      const strong = document.createElement('strong');
+      strong.textContent = label + '  ';
+      detail.append(strong, document.createTextNode(value));
+      card.appendChild(detail);
+    }
+
+    function openForm() {
+      formSection.hidden = false;
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closeForm() {
+      formSection.hidden = true;
+    }
+
+    function updateMinimumDetails() {
+      const selected = form.querySelector('[name="csat_minimum"]:checked');
+      const textarea = form.elements.csat_minimum_details;
+      const disabled = selected && selected.value === '없음';
+      textarea.disabled = Boolean(disabled);
+      if (disabled) textarea.value = '';
+    }
+
+    function showNotice(message, isError) {
+      notice.textContent = message;
+      notice.className = 'notice visible' + (isError ? ' error' : '');
+    }
+
+    function hideNotice() {
+      notice.textContent = '';
+      notice.className = 'notice';
+    }
+
+    function handleFailure(error) {
+      const message = error && error.message ? error.message : '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+      showNotice(message, true);
+    }
+  })();
+</script>
