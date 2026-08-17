@@ -70,18 +70,21 @@ function ensureApplicationsSheet_(spreadsheet) {
     sheet = spreadsheet.insertSheet(APP_CONFIG.APPLICATIONS_SHEET);
     ensureColumnCapacity_(sheet, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length);
     sheet.getRange(1, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
-      .setValues([APP_CONFIG.SHEET_HEADERS.APPLICATIONS]);
+      .setValues([APPLICATION_DISPLAY_HEADERS]);
   } else {
     migrateApplicationSheetIfNeeded_(spreadsheet);
   }
-  ensureDataSheet_(spreadsheet, APP_CONFIG.APPLICATIONS_SHEET, APP_CONFIG.SHEET_HEADERS.APPLICATIONS);
+  if (!hasExactApplicationHeaders_(sheet)) {
+    throw new Error('APPLICATIONS 시트의 헤더가 예상 구조와 다릅니다. 기존 데이터를 확인해 주세요.');
+  }
+  sheet.setFrozenRows(1);
 }
 
 function ensureApplicationSchema_() {
   const spreadsheet = getDatabaseSpreadsheet_();
   const sheet = spreadsheet.getSheetByName(APP_CONFIG.APPLICATIONS_SHEET);
   if (!sheet) throw new Error('APPLICATIONS 시트가 없습니다. “처음 시작하기”를 실행해 주세요.');
-  if (hasExactHeaders_(sheet, APP_CONFIG.SHEET_HEADERS.APPLICATIONS)) return;
+  if (hasExactApplicationHeaders_(sheet)) return;
 
   withDocumentLock_(function() {
     migrateApplicationSheetIfNeeded_(spreadsheet);
@@ -92,7 +95,7 @@ function ensureApplicationSchema_() {
 function migrateApplicationSheetIfNeeded_(spreadsheet) {
   const sheet = spreadsheet.getSheetByName(APP_CONFIG.APPLICATIONS_SHEET);
   if (!sheet) return;
-  if (hasExactHeaders_(sheet, APP_CONFIG.SHEET_HEADERS.APPLICATIONS)) return;
+  if (hasExactApplicationHeaders_(sheet)) return;
 
   if (hasExactHeaders_(sheet, LEGACY_APPLICATION_HEADERS)) {
     sheet.insertColumnsAfter(2, 3);
@@ -109,9 +112,17 @@ function migrateApplicationSheetIfNeeded_(spreadsheet) {
     sheet.insertColumnsAfter(5, 1);
     sheet.getRange(1, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
       .setValues([APP_CONFIG.SHEET_HEADERS.APPLICATIONS]);
+  }
+  if (hasExactHeaders_(sheet, APP_CONFIG.SHEET_HEADERS.APPLICATIONS)) {
+    sheet.getRange(1, 1, 1, APPLICATION_DISPLAY_HEADERS.length)
+      .setValues([APPLICATION_DISPLAY_HEADERS]);
     return;
   }
   throw new Error('APPLICATIONS 시트의 헤더가 예상 구조와 다릅니다. 기존 데이터를 확인해 주세요.');
+}
+
+function hasExactApplicationHeaders_(sheet) {
+  return hasExactHeaders_(sheet, APPLICATION_DISPLAY_HEADERS);
 }
 
 function ensureColumnCapacity_(sheet, requiredColumns) {
@@ -130,7 +141,7 @@ function hasExactHeaders_(sheet, headers) {
 function refreshApplicationsForTeacher_() {
   const spreadsheet = getDatabaseSpreadsheet_();
   const sheet = spreadsheet.getSheetByName(APP_CONFIG.APPLICATIONS_SHEET);
-  if (!sheet || !hasExactHeaders_(sheet, APP_CONFIG.SHEET_HEADERS.APPLICATIONS)) return;
+  if (!sheet || !hasExactApplicationHeaders_(sheet)) return;
 
   const students = getRowsAsObjects_(APP_CONFIG.STUDENTS_SHEET, APP_CONFIG.SHEET_HEADERS.STUDENTS);
   const studentsById = {};
@@ -180,6 +191,7 @@ function formatApplicationsForTeacher_(sheet) {
       .setWrap(true).setVerticalAlignment('top');
   }
   sheet.getRange(1, 1, 1, headers.length)
+    .setValues([APPLICATION_DISPLAY_HEADERS])
     .setFontWeight('bold').setBackground('#173f5f').setFontColor('#ffffff');
 
   if (lastRow > 1) {
@@ -188,8 +200,20 @@ function formatApplicationsForTeacher_(sheet) {
   }
   sheet.getBandings().forEach(function(banding) { banding.remove(); });
   if (lastRow > 1) {
-    sheet.getRange(2, 1, lastRow - 1, headers.length)
-      .applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, false, false);
+    const dataRange = sheet.getRange(2, 1, lastRow - 1, headers.length);
+    const values = dataRange.getValues();
+    let previousStudentId = null;
+    let groupIndex = -1;
+    const backgrounds = values.map(function(row) {
+      const studentId = String(row[1]);
+      if (studentId !== previousStudentId) {
+        groupIndex++;
+        previousStudentId = studentId;
+      }
+      const color = groupIndex % 2 === 0 ? '#ffffff' : '#eaf2f8';
+      return headers.map(function() { return color; });
+    });
+    dataRange.setBackgrounds(backgrounds);
   }
 }
 
