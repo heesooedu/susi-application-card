@@ -11,8 +11,17 @@
     const formSection = document.getElementById('application-form-section');
     const form = document.getElementById('application-form');
     const saveButton = document.getElementById('save-button');
+    const formTitle = document.getElementById('form-title');
+    const formKicker = document.getElementById('form-kicker');
+    const applicationFields = [
+      'university', 'department', 'admission_type', 'admission_name', 'quota',
+      'csat_minimum', 'csat_minimum_details', 'evaluation_elements',
+      'interview_details', 'official_url', 'source_reference', 'support_level',
+      'support_reason', 'strengths', 'concerns', 'questions'
+    ];
+    let editingApplicationId = '';
 
-    document.getElementById('open-form-button').addEventListener('click', openForm);
+    document.getElementById('open-form-button').addEventListener('click', function() { openForm(null); });
     document.getElementById('close-form-button').addEventListener('click', closeForm);
     document.getElementById('cancel-form-button').addEventListener('click', closeForm);
     form.addEventListener('submit', saveApplication);
@@ -27,11 +36,12 @@
     }
     loadDashboard();
 
-    function loadDashboard() {
+    function loadDashboard(successMessage) {
       showNotice('지원 카드를 불러오는 중입니다.', false);
       google.script.run
         .withSuccessHandler(function(data) {
-          hideNotice();
+          if (successMessage) showNotice(successMessage, false);
+          else hideNotice();
           document.getElementById('student-summary').textContent =
             data.student.className + ' · ' + data.student.number + '번 · ' + data.student.name;
           dashboard.hidden = false;
@@ -46,25 +56,25 @@
       if (!form.reportValidity()) return;
       const payload = {};
       new FormData(form).forEach(function(value, key) { payload[key] = value; });
+      const applicationId = editingApplicationId;
       saveButton.disabled = true;
       saveButton.textContent = '저장 중…';
 
-      google.script.run
+      const request = google.script.run
         .withSuccessHandler(function() {
-          form.reset();
-          updateMinimumDetails();
           closeForm();
           saveButton.disabled = false;
           saveButton.textContent = '카드 저장';
-          showNotice('지원 카드가 저장되었습니다.', false);
-          loadDashboard();
+          loadDashboard(applicationId ? '지원 카드가 수정되었습니다.' : '지원 카드가 저장되었습니다.');
         })
         .withFailureHandler(function(error) {
           saveButton.disabled = false;
-          saveButton.textContent = '카드 저장';
+          saveButton.textContent = applicationId ? '수정 내용 저장' : '카드 저장';
           handleFailure(error);
-        })
-        .createApplication(token, payload);
+        });
+
+      if (applicationId) request.updateApplication(token, applicationId, payload);
+      else request.createApplication(token, payload);
     }
 
     function renderApplications(applications) {
@@ -107,6 +117,23 @@
           link.textContent = '공식자료 보기 ↗';
           card.appendChild(link);
         }
+
+        const actions = document.createElement('div');
+        actions.className = 'card-actions';
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'button button-ghost button-small';
+        editButton.textContent = '수정';
+        editButton.addEventListener('click', function() { openForm(application); });
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'button button-danger button-small';
+        deleteButton.textContent = '삭제';
+        deleteButton.addEventListener('click', function() {
+          deleteApplicationFromCard(application, deleteButton);
+        });
+        actions.append(editButton, deleteButton);
+        card.appendChild(actions);
         list.appendChild(card);
       });
     }
@@ -121,13 +148,55 @@
       card.appendChild(detail);
     }
 
-    function openForm() {
+    function openForm(application) {
+      form.reset();
+      editingApplicationId = application ? application.id : '';
+      if (application) {
+        applicationFields.forEach(function(field) {
+          if (form.elements[field]) form.elements[field].value = application[field] || '';
+        });
+        formKicker.textContent = 'EDIT CARD';
+        formTitle.textContent = '지원 카드 수정';
+        saveButton.textContent = '수정 내용 저장';
+      } else {
+        formKicker.textContent = 'NEW CARD';
+        formTitle.textContent = '지원 카드 추가';
+        saveButton.textContent = '카드 저장';
+      }
+      updateMinimumDetails();
       formSection.hidden = false;
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function closeForm() {
       formSection.hidden = true;
+      form.reset();
+      editingApplicationId = '';
+      formKicker.textContent = 'NEW CARD';
+      formTitle.textContent = '지원 카드 추가';
+      saveButton.textContent = '카드 저장';
+      updateMinimumDetails();
+    }
+
+    function deleteApplicationFromCard(application, button) {
+      const confirmed = window.confirm(
+        application.university + ' ' + application.department + ' 지원 카드를 삭제할까요?\n삭제 후 학생 화면에서는 복구할 수 없습니다.'
+      );
+      if (!confirmed) return;
+
+      button.disabled = true;
+      button.textContent = '삭제 중…';
+      google.script.run
+        .withSuccessHandler(function() {
+          if (editingApplicationId === application.id) closeForm();
+          loadDashboard('지원 카드가 삭제되었습니다.');
+        })
+        .withFailureHandler(function(error) {
+          button.disabled = false;
+          button.textContent = '삭제';
+          handleFailure(error);
+        })
+        .deleteApplication(token, application.id);
     }
 
     function updateMinimumDetails() {
