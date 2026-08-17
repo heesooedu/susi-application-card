@@ -2,7 +2,11 @@ const APPLICATION_INPUT_FIELDS = Object.freeze([
   'university', 'department', 'admission_type', 'admission_name', 'quota',
   'csat_minimum', 'csat_minimum_details', 'evaluation_elements',
   'interview_details', 'official_url', 'source_reference', 'support_level',
-  'support_reason', 'strengths', 'concerns', 'questions'
+  'support_reason', 'strengths', 'concerns', 'questions',
+  'result_1_year', 'result_1_cut_50', 'result_1_cut_70', 'result_1_notes',
+  'result_1_url', 'result_2_year', 'result_2_cut_50', 'result_2_cut_70',
+  'result_2_notes', 'result_2_url', 'result_3_year', 'result_3_cut_50',
+  'result_3_cut_70', 'result_3_notes', 'result_3_url'
 ]);
 
 function listApplicationsForStudent_(studentId) {
@@ -103,6 +107,7 @@ function validateApplicationPayload_(payload) {
   const source = payload && typeof payload === 'object' ? payload : {};
   const supportLevels = ['매우 상향', '상향', '적정', '안정'];
   const minimumOptions = ['있음', '없음'];
+  const admissionTypes = ['교과', '종합', '논술', '실기'];
   const clean = {
     university: cleanText_(source.university, '대학', 150, true),
     department: cleanText_(source.department, '학과/학부', 150, true),
@@ -126,6 +131,17 @@ function validateApplicationPayload_(payload) {
   }
   if (supportLevels.indexOf(clean.support_level) === -1) {
     throw new Error('지원 수준 값이 올바르지 않습니다.');
+  }
+  if (admissionTypes.indexOf(clean.admission_type) === -1) {
+    throw new Error('전형 유형 값이 올바르지 않습니다.');
+  }
+  for (let index = 1; index <= 3; index++) {
+    const prefix = 'result_' + index + '_';
+    clean[prefix + 'year'] = cleanText_(source[prefix + 'year'], index + '번째 입시결과 학년도', 20, false);
+    clean[prefix + 'cut_50'] = cleanText_(source[prefix + 'cut_50'], index + '번째 입시결과 50% 컷', 200, false);
+    clean[prefix + 'cut_70'] = cleanText_(source[prefix + 'cut_70'], index + '번째 입시결과 70% 컷', 200, false);
+    clean[prefix + 'notes'] = cleanText_(source[prefix + 'notes'], index + '번째 입시결과 기타 메모', 1000, false);
+    clean[prefix + 'url'] = cleanHttpUrl_(source[prefix + 'url'], index + '번째 입시결과 URL');
   }
   if (clean.csat_minimum === '없음') clean.csat_minimum_details = '';
   return clean;

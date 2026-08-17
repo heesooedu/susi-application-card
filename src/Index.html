@@ -50,7 +50,13 @@
               <input name="department" maxlength="150" required>
             </label>
             <label>전형 유형 <span class="required">필수</span>
-              <input name="admission_type" maxlength="100" required placeholder="예: 학생부종합">
+              <select name="admission_type" required>
+                <option value="">선택하세요</option>
+                <option>교과</option>
+                <option>종합</option>
+                <option>논술</option>
+                <option>실기</option>
+              </select>
             </label>
             <label>전형명 <span class="required">필수</span>
               <input name="admission_name" maxlength="150" required placeholder="예: 학교장추천전형">
@@ -89,6 +95,66 @@
             <label>자료 기준
               <input name="source_reference" maxlength="500" placeholder="예: 2027학년도 수시모집요강 p.32">
             </label>
+            <details class="result-entry-section field-span-2">
+              <summary>직전 3년 입시결과 입력 <span class="optional">선택</span></summary>
+              <p class="form-help">교과전형은 각 대학 입학처에서 제공하는 입시결과를 보고 교과 50%, 70% 컷 등을 확인해보세요.</p>
+              <div class="result-year-grid">
+                <section class="result-year-card">
+                  <h3>직전 1개년</h3>
+                  <label>학년도
+                    <input name="result_1_year" maxlength="20" placeholder="예: 2026학년도">
+                  </label>
+                  <label>50% 컷
+                    <input name="result_1_cut_50" maxlength="200" placeholder="예: 2.15등급">
+                  </label>
+                  <label>70% 컷
+                    <input name="result_1_cut_70" maxlength="200" placeholder="예: 2.42등급">
+                  </label>
+                  <label>기타 메모
+                    <textarea name="result_1_notes" maxlength="1000" rows="3" placeholder="예: 충원율 180%, 예비 12번까지"></textarea>
+                  </label>
+                  <label>입시결과 URL
+                    <input name="result_1_url" type="url" maxlength="1000" inputmode="url" placeholder="https://...">
+                  </label>
+                </section>
+                <section class="result-year-card">
+                  <h3>직전 2개년</h3>
+                  <label>학년도
+                    <input name="result_2_year" maxlength="20" placeholder="예: 2025학년도">
+                  </label>
+                  <label>50% 컷
+                    <input name="result_2_cut_50" maxlength="200">
+                  </label>
+                  <label>70% 컷
+                    <input name="result_2_cut_70" maxlength="200">
+                  </label>
+                  <label>기타 메모
+                    <textarea name="result_2_notes" maxlength="1000" rows="3" placeholder="충원율 등"></textarea>
+                  </label>
+                  <label>입시결과 URL
+                    <input name="result_2_url" type="url" maxlength="1000" inputmode="url" placeholder="https://...">
+                  </label>
+                </section>
+                <section class="result-year-card">
+                  <h3>직전 3개년</h3>
+                  <label>학년도
+                    <input name="result_3_year" maxlength="20" placeholder="예: 2024학년도">
+                  </label>
+                  <label>50% 컷
+                    <input name="result_3_cut_50" maxlength="200">
+                  </label>
+                  <label>70% 컷
+                    <input name="result_3_cut_70" maxlength="200">
+                  </label>
+                  <label>기타 메모
+                    <textarea name="result_3_notes" maxlength="1000" rows="3" placeholder="충원율 등"></textarea>
+                  </label>
+                  <label>입시결과 URL
+                    <input name="result_3_url" type="url" maxlength="1000" inputmode="url" placeholder="https://...">
+                  </label>
+                </section>
+              </div>
+            </details>
             <label class="field-span-2">지원 이유
               <textarea name="support_reason" maxlength="3000" rows="4"></textarea>
             </label>

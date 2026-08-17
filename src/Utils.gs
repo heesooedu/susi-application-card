@@ -24,8 +24,12 @@ const APP_CONFIG = Object.freeze({
       'admission_type', 'admission_name', 'quota', 'csat_minimum',
       'csat_minimum_details', 'evaluation_elements', 'interview_details',
       'official_url', 'source_reference', 'support_level', 'support_reason',
-      'strengths', 'concerns', 'questions', 'created_at', 'updated_at',
-      'deleted_at'
+      'strengths', 'concerns', 'questions',
+      'result_1_year', 'result_1_cut_50', 'result_1_cut_70', 'result_1_notes',
+      'result_1_url', 'result_2_year', 'result_2_cut_50', 'result_2_cut_70',
+      'result_2_notes', 'result_2_url', 'result_3_year', 'result_3_cut_50',
+      'result_3_cut_70', 'result_3_notes', 'result_3_url', 'created_at',
+      'updated_at', 'deleted_at'
     ]),
     TEACHER_REVIEWS: Object.freeze([
       'review_id', 'application_id', 'student_id', 'teacher_judgment',
@@ -45,6 +49,15 @@ const LEGACY_APPLICATION_HEADERS = Object.freeze([
   'official_url', 'source_reference', 'support_level', 'support_reason',
   'strengths', 'concerns', 'questions', 'created_at', 'updated_at',
   'deleted_at'
+]);
+
+const PRE_RESULTS_APPLICATION_HEADERS = Object.freeze([
+  'application_id', 'student_id', 'student_name', 'class_name', 'number',
+  'university', 'department', 'admission_type', 'admission_name', 'quota',
+  'csat_minimum', 'csat_minimum_details', 'evaluation_elements',
+  'interview_details', 'official_url', 'source_reference', 'support_level',
+  'support_reason', 'strengths', 'concerns', 'questions', 'created_at',
+  'updated_at', 'deleted_at'
 ]);
 
 function getDatabaseSpreadsheet_() {
@@ -118,11 +131,12 @@ function cleanText_(value, fieldName, maxLength, required) {
   return text;
 }
 
-function cleanHttpUrl_(value) {
-  const url = cleanText_(value, '공식자료 URL', 1000, false);
+function cleanHttpUrl_(value, fieldName) {
+  const label = fieldName || '공식자료 URL';
+  const url = cleanText_(value, label, 1000, false);
   if (!url) return '';
   if (!/^https?:\/\//i.test(url)) {
-    throw new Error('공식자료 URL은 http:// 또는 https://로 시작해야 합니다.');
+    throw new Error(label + '은(는) http:// 또는 https://로 시작해야 합니다.');
   }
   return url;
 }

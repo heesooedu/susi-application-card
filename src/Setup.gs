@@ -68,6 +68,7 @@ function ensureApplicationsSheet_(spreadsheet) {
   let sheet = spreadsheet.getSheetByName(APP_CONFIG.APPLICATIONS_SHEET);
   if (!sheet) {
     sheet = spreadsheet.insertSheet(APP_CONFIG.APPLICATIONS_SHEET);
+    ensureColumnCapacity_(sheet, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length);
     sheet.getRange(1, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
       .setValues([APP_CONFIG.SHEET_HEADERS.APPLICATIONS]);
   } else {
@@ -95,6 +96,12 @@ function migrateApplicationSheetIfNeeded_(spreadsheet) {
 
   if (hasExactHeaders_(sheet, LEGACY_APPLICATION_HEADERS)) {
     sheet.insertColumnsAfter(2, 3);
+    sheet.getRange(1, 1, 1, PRE_RESULTS_APPLICATION_HEADERS.length)
+      .setValues([PRE_RESULTS_APPLICATION_HEADERS]);
+  }
+  if (hasExactHeaders_(sheet, PRE_RESULTS_APPLICATION_HEADERS)) {
+    const createdAtColumn = PRE_RESULTS_APPLICATION_HEADERS.indexOf('created_at') + 1;
+    sheet.insertColumnsBefore(createdAtColumn, 15);
     sheet.getRange(1, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
       .setValues([APP_CONFIG.SHEET_HEADERS.APPLICATIONS]);
     return;
@@ -102,7 +109,15 @@ function migrateApplicationSheetIfNeeded_(spreadsheet) {
   throw new Error('APPLICATIONS 시트의 헤더가 예상 구조와 다릅니다. 기존 데이터를 확인해 주세요.');
 }
 
+function ensureColumnCapacity_(sheet, requiredColumns) {
+  const currentColumns = sheet.getMaxColumns();
+  if (currentColumns < requiredColumns) {
+    sheet.insertColumnsAfter(currentColumns, requiredColumns - currentColumns);
+  }
+}
+
 function hasExactHeaders_(sheet, headers) {
+  if (sheet.getMaxColumns() < headers.length) return false;
   const current = sheet.getRange(1, 1, 1, headers.length).getValues()[0];
   return current.join('\u001f') === headers.join('\u001f');
 }

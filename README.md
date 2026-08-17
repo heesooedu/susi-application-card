@@ -22,7 +22,7 @@ src/
 
 - `설정`: 반 이름, 웹앱 URL, 번호/이름 명단 입력
 - `STUDENTS`: UUID, 반, 번호, 이름, token, 활성 상태, 학생 URL
-- `APPLICATIONS`: 지원 카드 한 장당 한 행(long format). 내부 ID 열은 숨기고 학생 이름·반·번호를 표시하며 이름순 정렬과 교차색상을 적용
+- `APPLICATIONS`: 지원 카드 한 장당 한 행(long format). 내부 ID 열은 숨기고 학생 이름·반·번호를 표시하며 이름순 정렬과 교차색상을 적용. 카드별로 최근 3개 학년의 학년도·50% 컷·70% 컷·기타 메모·입시결과 URL을 선택 저장
 - `TEACHER_REVIEWS`: 향후 교사 판단·코멘트·검토 상태 저장
 - `APPLICATION_HISTORY`: 카드 생성·수정·soft delete 당시 snapshot 저장
 
@@ -69,7 +69,7 @@ src/
 - 사용자 문자열이 공백 뒤 `=`, `+`, `-`, `@`로 시작하면 Sheets에 텍스트로 기록해 formula injection을 방지합니다.
 - 삭제는 먼저 `deleted_at`이 포함된 snapshot을 이력 시트에 남긴 다음 활성 `APPLICATIONS` 행을 제거합니다.
 
-기존 초기 스키마의 `APPLICATIONS` 시트는 새 코드가 처음 실행될 때 학생 표시 열을 자동 삽입하고, `student_id`를 기준으로 기존 카드의 이름·반·번호를 역채움합니다.
+이전 스키마의 `APPLICATIONS` 시트는 새 코드가 처음 실행될 때 학생 표시 열과 3개년 입시결과 열을 자동 삽입합니다. 기존 카드의 이름·반·번호는 `student_id`를 기준으로 역채우며 원래 카드 값은 보존합니다.
 
 ## 배포 전 점검
 

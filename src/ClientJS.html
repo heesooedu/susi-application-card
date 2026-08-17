@@ -13,11 +13,16 @@
     const saveButton = document.getElementById('save-button');
     const formTitle = document.getElementById('form-title');
     const formKicker = document.getElementById('form-kicker');
+    const resultEntrySection = form.querySelector('.result-entry-section');
     const applicationFields = [
       'university', 'department', 'admission_type', 'admission_name', 'quota',
       'csat_minimum', 'csat_minimum_details', 'evaluation_elements',
       'interview_details', 'official_url', 'source_reference', 'support_level',
-      'support_reason', 'strengths', 'concerns', 'questions'
+      'support_reason', 'strengths', 'concerns', 'questions',
+      'result_1_year', 'result_1_cut_50', 'result_1_cut_70', 'result_1_notes',
+      'result_1_url', 'result_2_year', 'result_2_cut_50', 'result_2_cut_70',
+      'result_2_notes', 'result_2_url', 'result_3_year', 'result_3_cut_50',
+      'result_3_cut_70', 'result_3_notes', 'result_3_url'
     ];
     let editingApplicationId = '';
 
@@ -118,6 +123,9 @@
         addDetail(details, '평가요소', application.evaluation_elements);
         addDetail(details, '면접 여부 및 방식', application.interview_details);
         addDetail(details, '자료 기준', application.source_reference);
+        addAdmissionResult(details, application, 1);
+        addAdmissionResult(details, application, 2);
+        addAdmissionResult(details, application, 3);
         addDetail(details, '지원 수준', application.support_level);
         addDetail(details, '지원 이유', application.support_reason);
         addDetail(details, '본인이 생각하는 강점', application.strengths);
@@ -165,6 +173,33 @@
       card.appendChild(detail);
     }
 
+    function addAdmissionResult(container, application, index) {
+      const prefix = 'result_' + index + '_';
+      const year = application[prefix + 'year'];
+      const cut50 = application[prefix + 'cut_50'];
+      const cut70 = application[prefix + 'cut_70'];
+      const notes = application[prefix + 'notes'];
+      const url = application[prefix + 'url'];
+      if (!year && !cut50 && !cut70 && !notes && !url) return;
+
+      const heading = document.createElement('h4');
+      heading.className = 'result-detail-heading';
+      heading.textContent = year || '직전 ' + index + '개년 입시결과';
+      container.appendChild(heading);
+      addDetail(container, '50% 컷', cut50);
+      addDetail(container, '70% 컷', cut70);
+      addDetail(container, '기타 메모', notes);
+      if (url) {
+        const link = document.createElement('a');
+        link.className = 'source-link result-source-link';
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = (year || '직전 ' + index + '개년') + ' 입시결과 보기 ↗';
+        container.appendChild(link);
+      }
+    }
+
     function openForm(application) {
       form.reset();
       editingApplicationId = application ? application.id : '';
@@ -175,10 +210,17 @@
         formKicker.textContent = 'EDIT CARD';
         formTitle.textContent = '지원 카드 수정';
         saveButton.textContent = '수정 내용 저장';
+        resultEntrySection.open = [1, 2, 3].some(function(index) {
+          const prefix = 'result_' + index + '_';
+          return application[prefix + 'year'] || application[prefix + 'cut_50'] ||
+            application[prefix + 'cut_70'] || application[prefix + 'notes'] ||
+            application[prefix + 'url'];
+        });
       } else {
         formKicker.textContent = 'NEW CARD';
         formTitle.textContent = '지원 카드 추가';
         saveButton.textContent = '카드 저장';
+        resultEntrySection.open = false;
       }
       updateMinimumDetails();
       formSection.hidden = false;
@@ -192,6 +234,7 @@
       formKicker.textContent = 'NEW CARD';
       formTitle.textContent = '지원 카드 추가';
       saveButton.textContent = '카드 저장';
+      resultEntrySection.open = false;
       updateMinimumDetails();
     }
 
