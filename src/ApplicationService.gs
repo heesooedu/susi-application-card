@@ -31,6 +31,7 @@ function createApplication(token, payload) {
       student_name: student.name,
       class_name: student.class_name,
       number: student.number,
+      teacher_comment: '',
       created_at: now,
       updated_at: now,
       deleted_at: ''
@@ -154,6 +155,7 @@ function toClientApplication_(application) {
   });
   result.createdAt = asIsoString_(application.created_at);
   result.updatedAt = asIsoString_(application.updated_at);
+  result.teacherComment = String(application.teacher_comment == null ? '' : application.teacher_comment);
   return result;
 }
 

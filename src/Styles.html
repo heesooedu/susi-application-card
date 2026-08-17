@@ -107,13 +107,30 @@
   .university { font-size: 20px; font-weight: 850; }
   .department { color: var(--muted); }
   .level-pill {
-    flex: none;
     padding: 4px 9px;
     border-radius: 999px;
     color: #70420d;
     background: #fff0d5;
     font-size: 12px;
     font-weight: 800;
+  }
+  .card-badges { display: flex; flex: none; align-items: flex-end; flex-direction: column; gap: 6px; }
+  .comment-pill {
+    padding: 4px 9px;
+    border-radius: 999px;
+    color: #70420d;
+    background: #ffe4a8;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .teacher-comment-alert {
+    margin: -5px 0 18px;
+    padding: 13px 15px;
+    color: #68420f;
+    border: 1px solid #eccb83;
+    border-radius: 12px;
+    background: #fff4d8;
+    font-weight: 750;
   }
   .admission-line { margin: 15px 0 0; font-weight: 700; }
   .application-details {
@@ -132,6 +149,15 @@
   }
   .application-details[open] { padding-bottom: 14px; }
   .application-details[open] summary { border-bottom: 1px solid #e3ecec; }
+  .teacher-comment-box {
+    margin-top: 13px;
+    padding: 13px;
+    color: #57390f;
+    border: 1px solid #ecd196;
+    border-radius: 10px;
+    background: #fff7e4;
+  }
+  .teacher-comment-box p { margin: 5px 0 0; white-space: pre-wrap; }
   .result-detail-heading {
     margin: 17px 0 4px;
     padding-top: 13px;

@@ -102,6 +102,11 @@ function migrateApplicationSheetIfNeeded_(spreadsheet) {
   if (hasExactHeaders_(sheet, PRE_RESULTS_APPLICATION_HEADERS)) {
     const createdAtColumn = PRE_RESULTS_APPLICATION_HEADERS.indexOf('created_at') + 1;
     sheet.insertColumnsBefore(createdAtColumn, 15);
+    sheet.getRange(1, 1, 1, PRE_TEACHER_COMMENT_APPLICATION_HEADERS.length)
+      .setValues([PRE_TEACHER_COMMENT_APPLICATION_HEADERS]);
+  }
+  if (hasExactHeaders_(sheet, PRE_TEACHER_COMMENT_APPLICATION_HEADERS)) {
+    sheet.insertColumnsAfter(5, 1);
     sheet.getRange(1, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
       .setValues([APP_CONFIG.SHEET_HEADERS.APPLICATIONS]);
     return;
@@ -169,12 +174,17 @@ function formatApplicationsForTeacher_(sheet) {
   sheet.setColumnWidth(3, 120);
   sheet.setColumnWidth(4, 120);
   sheet.setColumnWidth(5, 65);
+  sheet.setColumnWidth(6, 320);
+  if (sheet.getMaxRows() > 1) {
+    sheet.getRange(2, 6, sheet.getMaxRows() - 1, 1)
+      .setWrap(true).setVerticalAlignment('top');
+  }
   sheet.getRange(1, 1, 1, headers.length)
     .setFontWeight('bold').setBackground('#173f5f').setFontColor('#ffffff');
 
   if (lastRow > 1) {
     sheet.getRange(2, 1, lastRow - 1, headers.length)
-      .sort([{ column: 3, ascending: true }, { column: 6, ascending: true }]);
+      .sort([{ column: 3, ascending: true }, { column: 7, ascending: true }]);
   }
   sheet.getBandings().forEach(function(banding) { banding.remove(); });
   if (lastRow > 1) {

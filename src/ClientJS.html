@@ -8,6 +8,7 @@
     const dashboard = document.getElementById('dashboard');
     const list = document.getElementById('application-list');
     const emptyState = document.getElementById('empty-state');
+    const teacherCommentAlert = document.getElementById('teacher-comment-alert');
     const formSection = document.getElementById('application-form-section');
     const form = document.getElementById('application-form');
     const saveButton = document.getElementById('save-button');
@@ -85,7 +86,15 @@
     function renderApplications(applications) {
       list.replaceChildren();
       emptyState.hidden = applications.length !== 0;
+      const commentCount = applications.filter(function(application) {
+        return Boolean(application.teacherComment && application.teacherComment.trim());
+      }).length;
+      teacherCommentAlert.hidden = commentCount === 0;
+      teacherCommentAlert.textContent = commentCount
+        ? '🔔 선생님 코멘트가 등록된 지원 카드가 ' + commentCount + '개 있습니다.'
+        : '';
       applications.forEach(function(application) {
+        const hasTeacherComment = Boolean(application.teacherComment && application.teacherComment.trim());
         const card = document.createElement('article');
         card.className = 'application-card';
 
@@ -101,8 +110,17 @@
         const level = document.createElement('span');
         level.className = 'level-pill';
         level.textContent = application.support_level;
+        const badges = document.createElement('div');
+        badges.className = 'card-badges';
+        badges.appendChild(level);
+        if (hasTeacherComment) {
+          const commentBadge = document.createElement('span');
+          commentBadge.className = 'comment-pill';
+          commentBadge.textContent = '코멘트 있음';
+          badges.appendChild(commentBadge);
+        }
         titleWrap.append(university, department);
-        top.append(titleWrap, level);
+        top.append(titleWrap, badges);
         card.appendChild(top);
 
         const admission = document.createElement('p');
@@ -115,6 +133,16 @@
         const summary = document.createElement('summary');
         summary.textContent = '전체 내용 펼쳐보기';
         details.appendChild(summary);
+        if (hasTeacherComment) {
+          const commentBox = document.createElement('div');
+          commentBox.className = 'teacher-comment-box';
+          const commentTitle = document.createElement('strong');
+          commentTitle.textContent = '선생님 코멘트';
+          const commentText = document.createElement('p');
+          commentText.textContent = application.teacherComment;
+          commentBox.append(commentTitle, commentText);
+          details.appendChild(commentBox);
+        }
         addDetail(details, '전형 유형', application.admission_type);
         addDetail(details, '전형명', application.admission_name);
         addDetail(details, '모집인원', application.quota);

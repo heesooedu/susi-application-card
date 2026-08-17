@@ -20,7 +20,7 @@ const APP_CONFIG = Object.freeze({
     ]),
     APPLICATIONS: Object.freeze([
       'application_id', 'student_id', 'student_name', 'class_name', 'number',
-      'university', 'department',
+      'teacher_comment', 'university', 'department',
       'admission_type', 'admission_name', 'quota', 'csat_minimum',
       'csat_minimum_details', 'evaluation_elements', 'interview_details',
       'official_url', 'source_reference', 'support_level', 'support_reason',
@@ -57,6 +57,19 @@ const PRE_RESULTS_APPLICATION_HEADERS = Object.freeze([
   'csat_minimum', 'csat_minimum_details', 'evaluation_elements',
   'interview_details', 'official_url', 'source_reference', 'support_level',
   'support_reason', 'strengths', 'concerns', 'questions', 'created_at',
+  'updated_at', 'deleted_at'
+]);
+
+const PRE_TEACHER_COMMENT_APPLICATION_HEADERS = Object.freeze([
+  'application_id', 'student_id', 'student_name', 'class_name', 'number',
+  'university', 'department', 'admission_type', 'admission_name', 'quota',
+  'csat_minimum', 'csat_minimum_details', 'evaluation_elements',
+  'interview_details', 'official_url', 'source_reference', 'support_level',
+  'support_reason', 'strengths', 'concerns', 'questions',
+  'result_1_year', 'result_1_cut_50', 'result_1_cut_70', 'result_1_notes',
+  'result_1_url', 'result_2_year', 'result_2_cut_50', 'result_2_cut_70',
+  'result_2_notes', 'result_2_url', 'result_3_year', 'result_3_cut_50',
+  'result_3_cut_70', 'result_3_notes', 'result_3_url', 'created_at',
   'updated_at', 'deleted_at'
 ]);
 
