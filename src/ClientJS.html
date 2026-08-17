@@ -104,9 +104,25 @@
         admission.className = 'admission-line';
         admission.textContent = application.admission_type + ' · ' + application.admission_name;
         card.appendChild(admission);
-        addDetail(card, '모집인원', application.quota);
-        addDetail(card, '수능최저', application.csat_minimum + (application.csat_minimum_details ? ' · ' + application.csat_minimum_details : ''));
-        addDetail(card, '지원 이유', application.support_reason);
+
+        const details = document.createElement('details');
+        details.className = 'application-details';
+        const summary = document.createElement('summary');
+        summary.textContent = '전체 내용 펼쳐보기';
+        details.appendChild(summary);
+        addDetail(details, '전형 유형', application.admission_type);
+        addDetail(details, '전형명', application.admission_name);
+        addDetail(details, '모집인원', application.quota);
+        addDetail(details, '수능최저', application.csat_minimum);
+        addDetail(details, '수능최저 세부내용', application.csat_minimum_details);
+        addDetail(details, '평가요소', application.evaluation_elements);
+        addDetail(details, '면접 여부 및 방식', application.interview_details);
+        addDetail(details, '자료 기준', application.source_reference);
+        addDetail(details, '지원 수준', application.support_level);
+        addDetail(details, '지원 이유', application.support_reason);
+        addDetail(details, '본인이 생각하는 강점', application.strengths);
+        addDetail(details, '우려되는 점', application.concerns);
+        addDetail(details, '선생님께 질문하고 싶은 내용', application.questions);
 
         if (application.official_url) {
           const link = document.createElement('a');
@@ -115,8 +131,9 @@
           link.target = '_blank';
           link.rel = 'noopener noreferrer';
           link.textContent = '공식자료 보기 ↗';
-          card.appendChild(link);
+          details.appendChild(link);
         }
+        card.appendChild(details);
 
         const actions = document.createElement('div');
         actions.className = 'card-actions';

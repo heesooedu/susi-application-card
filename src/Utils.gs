@@ -19,7 +19,8 @@ const APP_CONFIG = Object.freeze({
       'student_url', 'created_at', 'updated_at'
     ]),
     APPLICATIONS: Object.freeze([
-      'application_id', 'student_id', 'university', 'department',
+      'application_id', 'student_id', 'student_name', 'class_name', 'number',
+      'university', 'department',
       'admission_type', 'admission_name', 'quota', 'csat_minimum',
       'csat_minimum_details', 'evaluation_elements', 'interview_details',
       'official_url', 'source_reference', 'support_level', 'support_reason',
@@ -36,6 +37,15 @@ const APP_CONFIG = Object.freeze({
     ])
   })
 });
+
+const LEGACY_APPLICATION_HEADERS = Object.freeze([
+  'application_id', 'student_id', 'university', 'department',
+  'admission_type', 'admission_name', 'quota', 'csat_minimum',
+  'csat_minimum_details', 'evaluation_elements', 'interview_details',
+  'official_url', 'source_reference', 'support_level', 'support_reason',
+  'strengths', 'concerns', 'questions', 'created_at', 'updated_at',
+  'deleted_at'
+]);
 
 function getDatabaseSpreadsheet_() {
   // 스프레드시트 사본에서는 복제된 Script Property가 원본 ID를 가리킬 수 있다.

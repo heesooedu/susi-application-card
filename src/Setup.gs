@@ -10,9 +10,10 @@ function startSetup_() {
       );
       setupSettingsSheet_(spreadsheet);
       ensureDataSheet_(spreadsheet, APP_CONFIG.STUDENTS_SHEET, APP_CONFIG.SHEET_HEADERS.STUDENTS);
-      ensureDataSheet_(spreadsheet, APP_CONFIG.APPLICATIONS_SHEET, APP_CONFIG.SHEET_HEADERS.APPLICATIONS);
+      ensureApplicationsSheet_(spreadsheet);
       ensureDataSheet_(spreadsheet, APP_CONFIG.REVIEWS_SHEET, APP_CONFIG.SHEET_HEADERS.TEACHER_REVIEWS);
       ensureDataSheet_(spreadsheet, APP_CONFIG.HISTORY_SHEET, APP_CONFIG.SHEET_HEADERS.APPLICATION_HISTORY);
+      refreshApplicationsForTeacher_();
     });
 
     SpreadsheetApp.getUi().alert(
@@ -63,6 +64,98 @@ function ensureDataSheet_(spreadsheet, name, headers) {
   sheet.setFrozenRows(1);
 }
 
+function ensureApplicationsSheet_(spreadsheet) {
+  let sheet = spreadsheet.getSheetByName(APP_CONFIG.APPLICATIONS_SHEET);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(APP_CONFIG.APPLICATIONS_SHEET);
+    sheet.getRange(1, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
+      .setValues([APP_CONFIG.SHEET_HEADERS.APPLICATIONS]);
+  } else {
+    migrateApplicationSheetIfNeeded_(spreadsheet);
+  }
+  ensureDataSheet_(spreadsheet, APP_CONFIG.APPLICATIONS_SHEET, APP_CONFIG.SHEET_HEADERS.APPLICATIONS);
+}
+
+function ensureApplicationSchema_() {
+  const spreadsheet = getDatabaseSpreadsheet_();
+  const sheet = spreadsheet.getSheetByName(APP_CONFIG.APPLICATIONS_SHEET);
+  if (!sheet) throw new Error('APPLICATIONS 시트가 없습니다. “처음 시작하기”를 실행해 주세요.');
+  if (hasExactHeaders_(sheet, APP_CONFIG.SHEET_HEADERS.APPLICATIONS)) return;
+
+  withDocumentLock_(function() {
+    migrateApplicationSheetIfNeeded_(spreadsheet);
+    refreshApplicationsForTeacher_();
+  });
+}
+
+function migrateApplicationSheetIfNeeded_(spreadsheet) {
+  const sheet = spreadsheet.getSheetByName(APP_CONFIG.APPLICATIONS_SHEET);
+  if (!sheet) return;
+  if (hasExactHeaders_(sheet, APP_CONFIG.SHEET_HEADERS.APPLICATIONS)) return;
+
+  if (hasExactHeaders_(sheet, LEGACY_APPLICATION_HEADERS)) {
+    sheet.insertColumnsAfter(2, 3);
+    sheet.getRange(1, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
+      .setValues([APP_CONFIG.SHEET_HEADERS.APPLICATIONS]);
+    return;
+  }
+  throw new Error('APPLICATIONS 시트의 헤더가 예상 구조와 다릅니다. 기존 데이터를 확인해 주세요.');
+}
+
+function hasExactHeaders_(sheet, headers) {
+  const current = sheet.getRange(1, 1, 1, headers.length).getValues()[0];
+  return current.join('\u001f') === headers.join('\u001f');
+}
+
+function refreshApplicationsForTeacher_() {
+  const spreadsheet = getDatabaseSpreadsheet_();
+  const sheet = spreadsheet.getSheetByName(APP_CONFIG.APPLICATIONS_SHEET);
+  if (!sheet || !hasExactHeaders_(sheet, APP_CONFIG.SHEET_HEADERS.APPLICATIONS)) return;
+
+  const students = getRowsAsObjects_(APP_CONFIG.STUDENTS_SHEET, APP_CONFIG.SHEET_HEADERS.STUDENTS);
+  const studentsById = {};
+  students.forEach(function(student) {
+    studentsById[String(student.student_id)] = student;
+  });
+
+  const headers = APP_CONFIG.SHEET_HEADERS.APPLICATIONS;
+  const applications = getRowsAsObjects_(APP_CONFIG.APPLICATIONS_SHEET, headers);
+  applications.forEach(function(application) {
+    const student = studentsById[String(application.student_id)];
+    application.student_name = student ? student.name : '(학생 정보 없음)';
+    application.class_name = student ? student.class_name : '';
+    application.number = student ? student.number : '';
+  });
+  if (applications.length) {
+    sheet.getRange(2, 1, applications.length, headers.length)
+      .setValues(applications.map(function(application) { return makeRow_(headers, application); }));
+  }
+  formatApplicationsForTeacher_(sheet);
+}
+
+function formatApplicationsForTeacher_(sheet) {
+  const headers = APP_CONFIG.SHEET_HEADERS.APPLICATIONS;
+  const lastRow = sheet.getLastRow();
+  sheet.hideColumns(1, 2);
+  sheet.setFrozenRows(1);
+  sheet.setFrozenColumns(5);
+  sheet.setColumnWidth(3, 120);
+  sheet.setColumnWidth(4, 120);
+  sheet.setColumnWidth(5, 65);
+  sheet.getRange(1, 1, 1, headers.length)
+    .setFontWeight('bold').setBackground('#173f5f').setFontColor('#ffffff');
+
+  if (lastRow > 1) {
+    sheet.getRange(2, 1, lastRow - 1, headers.length)
+      .sort([{ column: 3, ascending: true }, { column: 6, ascending: true }]);
+  }
+  sheet.getBandings().forEach(function(banding) { banding.remove(); });
+  if (lastRow > 1) {
+    sheet.getRange(2, 1, lastRow - 1, headers.length)
+      .applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, false, false);
+  }
+}
+
 function syncStudentsFromSettings_() {
   try {
     const result = withDocumentLock_(syncStudentsFromSettingsLocked_);
@@ -81,6 +174,7 @@ function syncStudentsFromSettingsLocked_() {
   const spreadsheet = getDatabaseSpreadsheet_();
   const settings = spreadsheet.getSheetByName(APP_CONFIG.SETTINGS_SHEET);
   if (!settings) throw new Error('설정 시트가 없습니다. “처음 시작하기”를 실행해 주세요.');
+  migrateApplicationSheetIfNeeded_(spreadsheet);
 
   const className = cleanText_(settings.getRange(APP_CONFIG.SETTINGS.CLASS_NAME_CELL).getDisplayValue(), '반 이름', 100, true);
   const lastRow = settings.getLastRow();
@@ -156,6 +250,7 @@ function syncStudentsFromSettingsLocked_() {
     sheet.getRange(2, 1, existing.length, headers.length)
       .setValues(existing.map(function(student) { return makeRow_(headers, student); }));
   }
+  refreshApplicationsForTeacher_();
   return { created: created, updated: updated, deactivated: deactivated };
 }
 

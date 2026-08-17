@@ -6,6 +6,7 @@ const APPLICATION_INPUT_FIELDS = Object.freeze([
 ]);
 
 function listApplicationsForStudent_(studentId) {
+  ensureApplicationSchema_();
   return getRowsAsObjects_(
     APP_CONFIG.APPLICATIONS_SHEET,
     APP_CONFIG.SHEET_HEADERS.APPLICATIONS
@@ -15,6 +16,7 @@ function listApplicationsForStudent_(studentId) {
 }
 
 function createApplication(token, payload) {
+  ensureApplicationSchema_();
   return withDocumentLock_(function() {
     const student = findActiveStudentByToken_(token);
     const clean = validateApplicationPayload_(payload);
@@ -22,6 +24,9 @@ function createApplication(token, payload) {
     const application = Object.assign({}, clean, {
       application_id: Utilities.getUuid(),
       student_id: student.student_id,
+      student_name: student.name,
+      class_name: student.class_name,
+      number: student.number,
       created_at: now,
       updated_at: now,
       deleted_at: ''
@@ -33,28 +38,37 @@ function createApplication(token, payload) {
       application
     );
     appendApplicationHistory_('CREATE', application);
+    refreshApplicationsForTeacher_();
     return toClientApplication_(application);
   });
 }
 
 // UI를 확장할 때 사용할 수 있는 수정 API. applicationId의 소유권을 token으로 재검사한다.
 function updateApplication(token, applicationId, payload) {
+  ensureApplicationSchema_();
   return withDocumentLock_(function() {
     const student = findActiveStudentByToken_(token);
     const found = findOwnedApplication_(student.student_id, applicationId);
     const clean = validateApplicationPayload_(payload);
-    const updated = Object.assign({}, found.application, clean, { updated_at: new Date() });
+    const updated = Object.assign({}, found.application, clean, {
+      student_name: student.name,
+      class_name: student.class_name,
+      number: student.number,
+      updated_at: new Date()
+    });
 
     getSheetOrThrow_(APP_CONFIG.APPLICATIONS_SHEET)
       .getRange(found.application._rowNumber, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
       .setValues([makeRow_(APP_CONFIG.SHEET_HEADERS.APPLICATIONS, updated)]);
     appendApplicationHistory_('UPDATE', updated);
+    refreshApplicationsForTeacher_();
     return toClientApplication_(updated);
   });
 }
 
 // soft delete만 수행하며, 전달받은 student_id는 받지도 신뢰하지도 않는다.
 function deleteApplication(token, applicationId) {
+  ensureApplicationSchema_();
   return withDocumentLock_(function() {
     const student = findActiveStudentByToken_(token);
     const found = findOwnedApplication_(student.student_id, applicationId);
@@ -67,6 +81,7 @@ function deleteApplication(token, applicationId) {
       .getRange(found.application._rowNumber, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
       .setValues([makeRow_(APP_CONFIG.SHEET_HEADERS.APPLICATIONS, deleted)]);
     appendApplicationHistory_('DELETE', deleted);
+    refreshApplicationsForTeacher_();
     return { success: true };
   });
 }
