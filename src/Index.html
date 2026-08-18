@@ -62,7 +62,7 @@
             <label>전형명 <span class="required">필수</span>
               <input name="admission_name" maxlength="150" required placeholder="예: 학교장추천전형">
             </label>
-            <label>모집인원
+            <label>모집인원 <span class="optional">선택</span>
               <input name="quota" maxlength="30" inputmode="numeric" placeholder="예: 12명">
             </label>
             <label>지원 수준 <span class="required">필수</span>
@@ -81,19 +81,19 @@
                 <label class="radio-label"><input type="radio" name="csat_minimum" value="없음" required> 없음</label>
               </div>
             </fieldset>
-            <label id="csat-details-label" class="field-span-2">수능최저 세부내용
+            <label id="csat-details-label" class="field-span-2">수능최저 세부내용 <span id="csat-details-requirement" class="optional">선택</span>
               <textarea name="csat_minimum_details" maxlength="1000" rows="2" placeholder="예: 국·수·영·탐(1) 중 3개 합 7 이내"></textarea>
             </label>
-            <label class="field-span-2">평가요소
+            <label class="field-span-2">평가요소 <span class="optional">선택</span>
               <textarea name="evaluation_elements" maxlength="2000" rows="3" placeholder="서류, 교과, 비교과 등의 반영 방식"></textarea>
             </label>
-            <label class="field-span-2">면접 여부 및 방식
+            <label class="field-span-2">면접 여부 및 방식 <span class="optional">선택</span>
               <textarea name="interview_details" maxlength="1000" rows="2" placeholder="면접 없음 / 제시문 기반 / 서류 확인 등"></textarea>
             </label>
-            <label>공식자료 URL
+            <label>공식자료 URL <span class="optional">선택</span>
               <input name="official_url" type="url" maxlength="1000" inputmode="url" placeholder="https://...">
             </label>
-            <label>자료 기준
+            <label>자료 기준 <span class="optional">선택</span>
               <input name="source_reference" maxlength="500" placeholder="예: 2027학년도 수시모집요강 p.32">
             </label>
             <details class="result-entry-section field-span-2">
@@ -102,70 +102,70 @@
               <div class="result-year-grid">
                 <section class="result-year-card">
                   <h3>직전 1개년</h3>
-                  <label>학년도
+                  <label>학년도 <span class="optional">선택</span>
                     <input name="result_1_year" maxlength="20" placeholder="예: 2026학년도">
                   </label>
-                  <label>50% 컷
+                  <label>50% 컷 <span class="optional">선택</span>
                     <input name="result_1_cut_50" maxlength="200" placeholder="예: 2.15등급">
                   </label>
-                  <label>70% 컷
+                  <label>70% 컷 <span class="optional">선택</span>
                     <input name="result_1_cut_70" maxlength="200" placeholder="예: 2.42등급">
                   </label>
-                  <label>기타 메모
+                  <label>기타 메모 <span class="optional">선택</span>
                     <textarea name="result_1_notes" maxlength="1000" rows="3" placeholder="예: 충원율 180%, 예비 12번까지"></textarea>
                   </label>
-                  <label>입시결과 URL
+                  <label>입시결과 URL <span class="optional">선택</span>
                     <input name="result_1_url" type="url" maxlength="1000" inputmode="url" placeholder="https://...">
                   </label>
                 </section>
                 <section class="result-year-card">
                   <h3>직전 2개년</h3>
-                  <label>학년도
+                  <label>학년도 <span class="optional">선택</span>
                     <input name="result_2_year" maxlength="20" placeholder="예: 2025학년도">
                   </label>
-                  <label>50% 컷
+                  <label>50% 컷 <span class="optional">선택</span>
                     <input name="result_2_cut_50" maxlength="200">
                   </label>
-                  <label>70% 컷
+                  <label>70% 컷 <span class="optional">선택</span>
                     <input name="result_2_cut_70" maxlength="200">
                   </label>
-                  <label>기타 메모
+                  <label>기타 메모 <span class="optional">선택</span>
                     <textarea name="result_2_notes" maxlength="1000" rows="3" placeholder="충원율 등"></textarea>
                   </label>
-                  <label>입시결과 URL
+                  <label>입시결과 URL <span class="optional">선택</span>
                     <input name="result_2_url" type="url" maxlength="1000" inputmode="url" placeholder="https://...">
                   </label>
                 </section>
                 <section class="result-year-card">
                   <h3>직전 3개년</h3>
-                  <label>학년도
+                  <label>학년도 <span class="optional">선택</span>
                     <input name="result_3_year" maxlength="20" placeholder="예: 2024학년도">
                   </label>
-                  <label>50% 컷
+                  <label>50% 컷 <span class="optional">선택</span>
                     <input name="result_3_cut_50" maxlength="200">
                   </label>
-                  <label>70% 컷
+                  <label>70% 컷 <span class="optional">선택</span>
                     <input name="result_3_cut_70" maxlength="200">
                   </label>
-                  <label>기타 메모
+                  <label>기타 메모 <span class="optional">선택</span>
                     <textarea name="result_3_notes" maxlength="1000" rows="3" placeholder="충원율 등"></textarea>
                   </label>
-                  <label>입시결과 URL
+                  <label>입시결과 URL <span class="optional">선택</span>
                     <input name="result_3_url" type="url" maxlength="1000" inputmode="url" placeholder="https://...">
                   </label>
                 </section>
               </div>
             </details>
-            <label class="field-span-2">지원 이유
+            <label class="field-span-2">지원 이유 <span class="optional">선택</span>
               <textarea name="support_reason" maxlength="3000" rows="4"></textarea>
             </label>
-            <label class="field-span-2">본인이 생각하는 강점
+            <label class="field-span-2">본인이 생각하는 강점 <span class="optional">선택</span>
               <textarea name="strengths" maxlength="3000" rows="4"></textarea>
             </label>
-            <label class="field-span-2">우려되는 점
+            <label class="field-span-2">우려되는 점 <span class="optional">선택</span>
               <textarea name="concerns" maxlength="3000" rows="4"></textarea>
             </label>
-            <label class="field-span-2">선생님께 질문하고 싶은 내용
+            <label class="field-span-2">선생님께 질문하고 싶은 내용 <span class="optional">선택</span>
               <textarea name="questions" maxlength="3000" rows="4"></textarea>
             </label>
           </div>

@@ -15,6 +15,7 @@
     const formTitle = document.getElementById('form-title');
     const formKicker = document.getElementById('form-kicker');
     const resultEntrySection = form.querySelector('.result-entry-section');
+    const minimumDetailsRequirement = document.getElementById('csat-details-requirement');
     const applicationFields = [
       'university', 'department', 'admission_type', 'admission_name', 'quota',
       'csat_minimum', 'csat_minimum_details', 'evaluation_elements',
@@ -290,8 +291,12 @@
     function updateMinimumDetails() {
       const selected = form.querySelector('[name="csat_minimum"]:checked');
       const textarea = form.elements.csat_minimum_details;
+      const required = selected && selected.value === '있음';
       const disabled = selected && selected.value === '없음';
+      textarea.required = Boolean(required);
       textarea.disabled = Boolean(disabled);
+      minimumDetailsRequirement.textContent = required ? '필수' : '선택';
+      minimumDetailsRequirement.className = required ? 'required' : 'optional';
       if (disabled) textarea.value = '';
     }
 

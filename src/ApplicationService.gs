@@ -130,6 +130,9 @@ function validateApplicationPayload_(payload) {
   if (minimumOptions.indexOf(clean.csat_minimum) === -1) {
     throw new Error('수능최저 여부 값이 올바르지 않습니다.');
   }
+  if (clean.csat_minimum === '있음' && !clean.csat_minimum_details) {
+    throw new Error('수능최저가 있으면 세부내용을 입력해 주세요.');
+  }
   if (supportLevels.indexOf(clean.support_level) === -1) {
     throw new Error('지원 수준 값이 올바르지 않습니다.');
   }
