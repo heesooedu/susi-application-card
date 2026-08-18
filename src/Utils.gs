@@ -4,6 +4,7 @@ const APP_CONFIG = Object.freeze({
   STUDENTS_SHEET: 'STUDENTS',
   APPLICATIONS_SHEET: 'APPLICATIONS',
   REVIEWS_SHEET: 'TEACHER_REVIEWS',
+  COMMENT_READS_SHEET: 'TEACHER_COMMENT_READS',
   HISTORY_SHEET: 'APPLICATION_HISTORY',
   SPREADSHEET_ID_PROPERTY: 'DATABASE_SPREADSHEET_ID',
   SETTINGS: Object.freeze({
@@ -34,6 +35,9 @@ const APP_CONFIG = Object.freeze({
     TEACHER_REVIEWS: Object.freeze([
       'review_id', 'application_id', 'student_id', 'teacher_judgment',
       'teacher_comment', 'review_status', 'created_at', 'updated_at'
+    ]),
+    TEACHER_COMMENT_READS: Object.freeze([
+      'application_id', 'student_id', 'comment_fingerprint', 'read_at'
     ]),
     APPLICATION_HISTORY: Object.freeze([
       'history_id', 'application_id', 'student_id', 'action',

@@ -12,6 +12,9 @@ function startSetup_() {
       ensureDataSheet_(spreadsheet, APP_CONFIG.STUDENTS_SHEET, APP_CONFIG.SHEET_HEADERS.STUDENTS);
       ensureApplicationsSheet_(spreadsheet);
       ensureDataSheet_(spreadsheet, APP_CONFIG.REVIEWS_SHEET, APP_CONFIG.SHEET_HEADERS.TEACHER_REVIEWS);
+      ensureDataSheet_(spreadsheet, APP_CONFIG.COMMENT_READS_SHEET, APP_CONFIG.SHEET_HEADERS.TEACHER_COMMENT_READS);
+      const commentReadsSheet = spreadsheet.getSheetByName(APP_CONFIG.COMMENT_READS_SHEET);
+      if (commentReadsSheet && !commentReadsSheet.isSheetHidden()) commentReadsSheet.hideSheet();
       ensureDataSheet_(spreadsheet, APP_CONFIG.HISTORY_SHEET, APP_CONFIG.SHEET_HEADERS.APPLICATION_HISTORY);
       refreshApplicationsForTeacher_();
     });

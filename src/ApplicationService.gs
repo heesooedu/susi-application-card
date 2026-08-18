@@ -85,6 +85,7 @@ function deleteApplication(token, applicationId) {
 
     appendApplicationHistory_('DELETE', deleted);
     getSheetOrThrow_(APP_CONFIG.APPLICATIONS_SHEET).deleteRow(found.application._rowNumber);
+    deleteTeacherCommentReadsForApplication_(student.student_id, found.application.application_id);
     refreshApplicationsForTeacher_();
     return { success: true };
   });
@@ -117,8 +118,8 @@ function validateApplicationPayload_(payload) {
     quota: cleanText_(source.quota, '모집인원', 30, false),
     csat_minimum: cleanText_(source.csat_minimum, '수능최저 여부', 10, true),
     csat_minimum_details: cleanText_(source.csat_minimum_details, '수능최저 세부내용', 1000, false),
-    evaluation_elements: cleanText_(source.evaluation_elements, '평가요소', 2000, false),
-    interview_details: cleanText_(source.interview_details, '면접 여부 및 방식', 1000, false),
+    evaluation_elements: cleanText_(source.evaluation_elements, '평가요소', 2000, true),
+    interview_details: cleanText_(source.interview_details, '면접 여부 및 방식', 1000, true),
     official_url: cleanHttpUrl_(source.official_url),
     source_reference: cleanText_(source.source_reference, '자료 기준', 500, false),
     support_level: cleanText_(source.support_level, '지원 수준', 20, true),

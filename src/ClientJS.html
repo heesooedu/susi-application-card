@@ -88,11 +88,11 @@
       list.replaceChildren();
       emptyState.hidden = applications.length !== 0;
       const commentCount = applications.filter(function(application) {
-        return Boolean(application.teacherComment && application.teacherComment.trim());
+        return application.teacherCommentUnread === true;
       }).length;
       teacherCommentAlert.hidden = commentCount === 0;
       teacherCommentAlert.textContent = commentCount
-        ? '🔔 선생님 코멘트가 등록된 지원 카드가 ' + commentCount + '개 있습니다.'
+        ? '🔔 아직 확인하지 않은 선생님 코멘트가 ' + commentCount + '개 있습니다.'
         : '';
       applications.forEach(function(application) {
         const hasTeacherComment = Boolean(application.teacherComment && application.teacherComment.trim());
@@ -114,10 +114,10 @@
         const badges = document.createElement('div');
         badges.className = 'card-badges';
         badges.appendChild(level);
-        if (hasTeacherComment) {
+        if (application.teacherCommentUnread === true) {
           const commentBadge = document.createElement('span');
           commentBadge.className = 'comment-pill';
-          commentBadge.textContent = '코멘트 있음';
+          commentBadge.textContent = '새 코멘트';
           badges.appendChild(commentBadge);
         }
         titleWrap.append(university, department);
@@ -142,6 +142,16 @@
           const commentText = document.createElement('p');
           commentText.textContent = application.teacherComment;
           commentBox.append(commentTitle, commentText);
+          if (application.teacherCommentUnread === true) {
+            const readButton = document.createElement('button');
+            readButton.type = 'button';
+            readButton.className = 'button button-comment-read button-small';
+            readButton.textContent = '확인했어요';
+            readButton.addEventListener('click', function() {
+              acknowledgeTeacherCommentFromCard(application, readButton);
+            });
+            commentBox.appendChild(readButton);
+          }
           details.appendChild(commentBox);
         }
         addDetail(details, '전형 유형', application.admission_type);
@@ -227,6 +237,21 @@
         link.textContent = (year || '직전 ' + index + '개년') + ' 입시결과 보기 ↗';
         container.appendChild(link);
       }
+    }
+
+    function acknowledgeTeacherCommentFromCard(application, button) {
+      button.disabled = true;
+      button.textContent = '처리 중…';
+      google.script.run
+        .withSuccessHandler(function() {
+          loadDashboard('선생님 코멘트를 확인했습니다.');
+        })
+        .withFailureHandler(function(error) {
+          button.disabled = false;
+          button.textContent = '확인했어요';
+          handleFailure(error);
+        })
+        .acknowledgeTeacherComment(token, application.id, application.teacherCommentVersion);
     }
 
     function openForm(application) {
