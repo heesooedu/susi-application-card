@@ -32,6 +32,7 @@ function createApplication(token, payload) {
       class_name: student.class_name,
       number: student.number,
       teacher_comment: '',
+      teacher_comment_read: false,
       created_at: now,
       updated_at: now,
       deleted_at: ''

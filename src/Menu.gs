@@ -10,6 +10,21 @@ function onOpen() {
     .addToUi();
 }
 
+function onEdit(event) {
+  if (!event || !event.range) return;
+  const sheet = event.range.getSheet();
+  if (sheet.getName() !== APP_CONFIG.APPLICATIONS_SHEET || event.range.getRow() < 2) return;
+
+  const commentColumn = APP_CONFIG.SHEET_HEADERS.APPLICATIONS.indexOf('teacher_comment') + 1;
+  const confirmationColumn = APP_CONFIG.SHEET_HEADERS.APPLICATIONS.indexOf('teacher_comment_read') + 1;
+  const firstEditedColumn = event.range.getColumn();
+  const lastEditedColumn = event.range.getLastColumn();
+  if (commentColumn < firstEditedColumn || commentColumn > lastEditedColumn) return;
+
+  sheet.getRange(event.range.getRow(), confirmationColumn, event.range.getNumRows(), 1)
+    .setValue(false);
+}
+
 function showHelp_() {
   const message = [
     '1. “처음 시작하기”로 필요한 시트를 준비합니다.',

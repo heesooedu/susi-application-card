@@ -66,8 +66,28 @@ function acknowledgeTeacherComment(token, applicationId, displayedCommentVersion
     } else {
       sheet.appendRow(makeRow_(headers, data));
     }
+    const confirmationColumn = APP_CONFIG.SHEET_HEADERS.APPLICATIONS
+      .indexOf('teacher_comment_read') + 1;
+    getSheetOrThrow_(APP_CONFIG.APPLICATIONS_SHEET)
+      .getRange(found.application._rowNumber, confirmationColumn)
+      .setValue(true);
     return { success: true };
   });
+}
+
+function getTeacherCommentReadsByApplication_() {
+  const spreadsheet = getDatabaseSpreadsheet_();
+  const sheet = spreadsheet.getSheetByName(APP_CONFIG.COMMENT_READS_SHEET);
+  if (!sheet) return {};
+  const headers = APP_CONFIG.SHEET_HEADERS.TEACHER_COMMENT_READS;
+  if (!hasExactHeaders_(sheet, headers)) {
+    throw new Error('TEACHER_COMMENT_READS 시트의 헤더가 예상 구조와 다릅니다.');
+  }
+  const result = {};
+  getRowsAsObjects_(APP_CONFIG.COMMENT_READS_SHEET, headers).forEach(function(read) {
+    result[String(read.application_id)] = read;
+  });
+  return result;
 }
 
 function getTeacherCommentReadFingerprints_(studentId) {

@@ -21,7 +21,7 @@ const APP_CONFIG = Object.freeze({
     ]),
     APPLICATIONS: Object.freeze([
       'application_id', 'student_id', 'student_name', 'class_name', 'number',
-      'teacher_comment', 'university', 'department',
+      'teacher_comment', 'teacher_comment_read', 'university', 'department',
       'admission_type', 'admission_name', 'quota', 'csat_minimum',
       'csat_minimum_details', 'evaluation_elements', 'interview_details',
       'official_url', 'source_reference', 'support_level', 'support_reason',
@@ -77,8 +77,37 @@ const PRE_TEACHER_COMMENT_APPLICATION_HEADERS = Object.freeze([
   'updated_at', 'deleted_at'
 ]);
 
-const APPLICATION_DISPLAY_HEADERS = Object.freeze([
+const PRE_STUDENT_CONFIRMATION_APPLICATION_HEADERS = Object.freeze([
+  'application_id', 'student_id', 'student_name', 'class_name', 'number',
+  'teacher_comment', 'university', 'department',
+  'admission_type', 'admission_name', 'quota', 'csat_minimum',
+  'csat_minimum_details', 'evaluation_elements', 'interview_details',
+  'official_url', 'source_reference', 'support_level', 'support_reason',
+  'strengths', 'concerns', 'questions',
+  'result_1_year', 'result_1_cut_50', 'result_1_cut_70', 'result_1_notes',
+  'result_1_url', 'result_2_year', 'result_2_cut_50', 'result_2_cut_70',
+  'result_2_notes', 'result_2_url', 'result_3_year', 'result_3_cut_50',
+  'result_3_cut_70', 'result_3_notes', 'result_3_url', 'created_at',
+  'updated_at', 'deleted_at'
+]);
+
+const PRE_STUDENT_CONFIRMATION_DISPLAY_HEADERS = Object.freeze([
   '지원카드 ID', '학생 ID', '학생 이름', '반', '번호', '교사 코멘트',
+  '대학', '학과/학부', '전형 유형', '전형명', '모집인원',
+  '수능최저 여부', '수능최저 세부내용', '평가요소', '면접 여부 및 방식',
+  '공식자료 URL', '자료 기준', '학생 지원 수준', '지원 이유',
+  '본인이 생각하는 강점', '우려되는 점', '선생님께 질문',
+  '직전 1개년 학년도', '직전 1개년 50% 컷', '직전 1개년 70% 컷',
+  '직전 1개년 기타 메모', '직전 1개년 입시결과 URL',
+  '직전 2개년 학년도', '직전 2개년 50% 컷', '직전 2개년 70% 컷',
+  '직전 2개년 기타 메모', '직전 2개년 입시결과 URL',
+  '직전 3개년 학년도', '직전 3개년 50% 컷', '직전 3개년 70% 컷',
+  '직전 3개년 기타 메모', '직전 3개년 입시결과 URL',
+  '작성일시', '수정일시', '삭제일시'
+]);
+
+const APPLICATION_DISPLAY_HEADERS = Object.freeze([
+  '지원카드 ID', '학생 ID', '학생 이름', '반', '번호', '교사 코멘트', '학생 확인',
   '대학', '학과/학부', '전형 유형', '전형명', '모집인원',
   '수능최저 여부', '수능최저 세부내용', '평가요소', '면접 여부 및 방식',
   '공식자료 URL', '자료 기준', '학생 지원 수준', '지원 이유',

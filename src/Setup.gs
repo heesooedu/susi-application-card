@@ -113,6 +113,15 @@ function migrateApplicationSheetIfNeeded_(spreadsheet) {
   }
   if (hasExactHeaders_(sheet, PRE_TEACHER_COMMENT_APPLICATION_HEADERS)) {
     sheet.insertColumnsAfter(5, 1);
+    sheet.getRange(1, 1, 1, PRE_STUDENT_CONFIRMATION_APPLICATION_HEADERS.length)
+      .setValues([PRE_STUDENT_CONFIRMATION_APPLICATION_HEADERS]);
+  }
+  if (hasExactHeaders_(sheet, PRE_STUDENT_CONFIRMATION_DISPLAY_HEADERS)) {
+    sheet.getRange(1, 1, 1, PRE_STUDENT_CONFIRMATION_APPLICATION_HEADERS.length)
+      .setValues([PRE_STUDENT_CONFIRMATION_APPLICATION_HEADERS]);
+  }
+  if (hasExactHeaders_(sheet, PRE_STUDENT_CONFIRMATION_APPLICATION_HEADERS)) {
+    sheet.insertColumnsAfter(6, 1);
     sheet.getRange(1, 1, 1, APP_CONFIG.SHEET_HEADERS.APPLICATIONS.length)
       .setValues([APP_CONFIG.SHEET_HEADERS.APPLICATIONS]);
   }
@@ -154,6 +163,7 @@ function refreshApplicationsForTeacher_() {
 
   const headers = APP_CONFIG.SHEET_HEADERS.APPLICATIONS;
   let applications = getRowsAsObjects_(APP_CONFIG.APPLICATIONS_SHEET, headers);
+  const commentReads = getTeacherCommentReadsByApplication_();
   // 구버전에서 soft delete된 행은 DELETE 이력이 이미 보존되어 있으므로 활성 시트에서 제거한다.
   const deletedRows = applications.filter(function(application) {
     return Boolean(application.deleted_at);
@@ -171,7 +181,13 @@ function refreshApplicationsForTeacher_() {
     application.student_name = student ? student.name : '(학생 정보 없음)';
     application.class_name = student ? student.class_name : '';
     application.number = student ? student.number : '';
+    const comment = normalizeTeacherComment_(application.teacher_comment);
+    const read = commentReads[String(application.application_id)];
+    application.teacher_comment_read = Boolean(comment) && Boolean(read) &&
+      String(read.student_id) === String(application.student_id) &&
+      String(read.comment_fingerprint) === fingerprintTeacherComment_(comment);
   });
+  applications.sort(compareApplicationsForTeacher_);
   if (applications.length) {
     sheet.getRange(2, 1, applications.length, headers.length)
       .setValues(applications.map(function(application) { return makeRow_(headers, application); }));
@@ -189,18 +205,18 @@ function formatApplicationsForTeacher_(sheet) {
   sheet.setColumnWidth(4, 120);
   sheet.setColumnWidth(5, 65);
   sheet.setColumnWidth(6, 320);
+  sheet.setColumnWidth(7, 90);
   if (sheet.getMaxRows() > 1) {
     sheet.getRange(2, 6, sheet.getMaxRows() - 1, 1)
       .setWrap(true).setVerticalAlignment('top');
+    const checkboxRule = SpreadsheetApp.newDataValidation().requireCheckbox().build();
+    sheet.getRange(2, 7, sheet.getMaxRows() - 1, 1)
+      .setDataValidation(checkboxRule).setHorizontalAlignment('center');
   }
   sheet.getRange(1, 1, 1, headers.length)
     .setValues([APPLICATION_DISPLAY_HEADERS])
     .setFontWeight('bold').setBackground('#173f5f').setFontColor('#ffffff');
 
-  if (lastRow > 1) {
-    sheet.getRange(2, 1, lastRow - 1, headers.length)
-      .sort([{ column: 3, ascending: true }, { column: 7, ascending: true }]);
-  }
   sheet.getBandings().forEach(function(banding) { banding.remove(); });
   if (lastRow > 1) {
     const dataRange = sheet.getRange(2, 1, lastRow - 1, headers.length);
@@ -218,6 +234,36 @@ function formatApplicationsForTeacher_(sheet) {
     });
     dataRange.setBackgrounds(backgrounds);
   }
+}
+
+function compareApplicationsForTeacher_(left, right) {
+  const studentFields = ['student_name', 'class_name', 'number', 'student_id'];
+  for (let index = 0; index < studentFields.length; index++) {
+    const field = studentFields[index];
+    const comparison = compareTeacherSortText_(left[field], right[field]);
+    if (comparison !== 0) return comparison;
+  }
+
+  const supportOrder = {
+    '매우 상향': 0,
+    '상향': 1,
+    '적정': 2,
+    '안정': 3
+  };
+  const leftRank = Object.prototype.hasOwnProperty.call(supportOrder, left.support_level)
+    ? supportOrder[left.support_level] : 4;
+  const rightRank = Object.prototype.hasOwnProperty.call(supportOrder, right.support_level)
+    ? supportOrder[right.support_level] : 4;
+  if (leftRank !== rightRank) return leftRank - rightRank;
+
+  const universityComparison = compareTeacherSortText_(left.university, right.university);
+  if (universityComparison !== 0) return universityComparison;
+  return compareTeacherSortText_(left.department, right.department);
+}
+
+function compareTeacherSortText_(left, right) {
+  return String(left == null ? '' : left)
+    .localeCompare(String(right == null ? '' : right), 'ko');
 }
 
 function syncStudentsFromSettings_() {
